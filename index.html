@@ -1,0 +1,129 @@
+<!doctype html>
+<html lang="vi">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Xây Gạch Triết Học</title>
+  <meta name="description" content="Trả lời câu hỏi triết học, mỗi câu đúng xây thêm một viên gạch cho 3 mô hình triết học dễ thương." />
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🧱</text></svg>" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@500;600;700;800&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <header class="top">
+    <div class="brand">
+      <span class="logo">🧱</span>
+      <div>
+        <h1>Xây Gạch Triết Học</h1>
+        <p>Trả lời đúng thì đặt thêm một viên gạch</p>
+      </div>
+    </div>
+    <div class="stats">
+      <div class="stat"><b id="score">0</b><span>viên gạch</span></div>
+      <div class="stat"><b id="streak">0</b><span>chuỗi 🔥</span></div>
+      <button id="openBank" class="btn soft">📚 Kho câu hỏi</button>
+    </div>
+  </header>
+
+  <nav id="tabs" class="tabs" aria-label="Chọn mô hình"></nav>
+
+  <main class="layout">
+    <section class="card stage-card" id="stageCard">
+      <div class="stage-head">
+        <h2 id="modelName"></h2>
+        <span id="modelProgress" class="pill"></span>
+      </div>
+      <p id="modelDesc" class="desc"></p>
+      <div class="stage">
+        <svg id="stage" viewBox="-20 -20 360 360" role="img" aria-label="Mô hình đang xây"></svg>
+      </div>
+      <div class="bar"><div id="bar"></div></div>
+    </section>
+
+    <section class="card quiz-card">
+      <div class="q-meta">
+        <span id="qTag" class="pill">Câu hỏi</span>
+        <span id="qCount" class="muted"></span>
+      </div>
+      <h3 id="question">Đang tải câu hỏi…</h3>
+      <div id="options" class="options"></div>
+      <div id="feedback" class="feedback" hidden></div>
+      <button id="nextBtn" class="btn primary wide" hidden>Câu tiếp theo →</button>
+      <p class="hint muted">Mẹo: bấm phím 1–4 để chọn, Enter để sang câu tiếp.</p>
+    </section>
+  </main>
+
+  <div id="toast" class="toast" role="status" aria-live="polite"></div>
+  <div id="confetti" class="confetti" aria-hidden="true"></div>
+
+  <!-- Kho câu hỏi -->
+  <div id="bank" class="modal" hidden>
+    <div class="sheet">
+      <div class="sheet-head">
+        <h2>📚 Kho câu hỏi</h2>
+        <button class="x" data-close aria-label="Đóng">✕</button>
+      </div>
+
+      <form id="addForm" class="add-form">
+        <h4>➕ Thêm câu hỏi của bạn</h4>
+        <label class="field">
+          <span>Câu hỏi</span>
+          <textarea id="fQ" rows="2" required placeholder="Ví dụ: Ai là tác giả của “Đạo Đức Kinh”?"></textarea>
+        </label>
+        <div class="field">
+          <span>Đáp án <small class="muted">(chấm tròn = đáp án đúng, cần ít nhất 2 đáp án)</small></span>
+          <div class="opt-inputs">
+            <label class="opt-in"><input type="radio" name="fC" value="0" checked /><input type="text" class="fA" placeholder="Đáp án A" /></label>
+            <label class="opt-in"><input type="radio" name="fC" value="1" /><input type="text" class="fA" placeholder="Đáp án B" /></label>
+            <label class="opt-in"><input type="radio" name="fC" value="2" /><input type="text" class="fA" placeholder="Đáp án C (không bắt buộc)" /></label>
+            <label class="opt-in"><input type="radio" name="fC" value="3" /><input type="text" class="fA" placeholder="Đáp án D (không bắt buộc)" /></label>
+          </div>
+        </div>
+        <label class="field">
+          <span>Giải thích <small class="muted">(không bắt buộc)</small></span>
+          <input id="fE" type="text" placeholder="Một câu ngắn hiện ra sau khi trả lời" />
+        </label>
+        <button class="btn primary" type="submit">Thêm vào bộ sưu tập</button>
+      </form>
+
+      <div class="bank-tools">
+        <label class="mode">Chơi với:
+          <select id="mode">
+            <option value="all">Tất cả câu hỏi</option>
+            <option value="custom">Chỉ câu tôi thêm</option>
+          </select>
+        </label>
+        <div class="tool-btns">
+          <button id="exportBtn" class="btn soft sm" type="button">⬇️ Xuất JSON</button>
+          <label class="btn soft sm" for="importFile">⬆️ Nhập JSON</label>
+          <input id="importFile" type="file" accept="application/json,.json" hidden />
+          <button id="resetBtn" class="btn soft sm danger" type="button">↺ Xây lại từ đầu</button>
+        </div>
+      </div>
+
+      <div class="list-head">
+        <input id="search" type="search" placeholder="🔍 Tìm câu hỏi…" />
+        <span id="listCount" class="muted"></span>
+      </div>
+      <ul id="qList" class="q-list"></ul>
+    </div>
+  </div>
+
+  <!-- Hoàn thành mô hình -->
+  <div id="win" class="modal" hidden>
+    <div class="sheet small center">
+      <div class="win-emoji" id="winEmoji">🏛️</div>
+      <h2 id="winTitle"></h2>
+      <svg id="winSvg" class="win-svg" viewBox="-20 -20 360 360"></svg>
+      <p id="winFact" class="desc"></p>
+      <div class="win-btns" id="winBtns"></div>
+    </div>
+  </div>
+
+  <script src="questions.js"></script>
+  <script src="models.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>

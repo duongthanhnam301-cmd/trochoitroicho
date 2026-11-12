@@ -1,0 +1,119 @@
+<!doctype html>
+<html lang="vi">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Thắp Sáng Việt Nam</title>
+  <meta name="description" content="Trả lời đúng để thắp sáng 34 tỉnh thành trên bản đồ Việt Nam và nhận huy hiệu Người Việt Nam chất." />
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>⭐</text></svg>" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@500;600;700;800&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <header class="top">
+    <div class="brand">
+      <span class="logo">⭐</span>
+      <div>
+        <h1>Thắp Sáng Việt Nam</h1>
+        <p>Mỗi câu trả lời đúng thắp sáng một tỉnh thành</p>
+      </div>
+    </div>
+    <div class="stats">
+      <div class="stat"><b id="litCount">0/34</b><span>tỉnh thành</span></div>
+      <div class="stat"><b id="streak">0</b><span>chuỗi 🔥</span></div>
+      <button id="badgeBtn" class="badge-btn locked" title="Huy hiệu Người Việt Nam chất">🏅</button>
+      <button id="openBank" class="btn">📚 Kho câu hỏi</button>
+    </div>
+  </header>
+
+  <main class="layout">
+    <section class="card map-card">
+      <div class="map-head">
+        <div class="progress"><div id="bar"></div></div>
+        <span id="pct" class="muted">0%</span>
+      </div>
+      <div class="map-wrap">
+        <svg id="map" role="img" aria-label="Bản đồ Việt Nam"></svg>
+        <div id="tip" class="tip" hidden></div>
+      </div>
+      <div id="regions" class="regions"></div>
+      <p class="credit">Dữ liệu ranh giới: <a href="https://github.com/nguyenduy1133/Free-GIS-Data" target="_blank" rel="noopener">Free-GIS-Data</a> (rút gọn). Bản đồ minh họa, không dùng làm căn cứ pháp lý.</p>
+    </section>
+
+    <div class="side">
+      <section class="card quiz-card">
+        <div class="q-meta">
+          <span id="qTag" class="pill">🔦 Tỉnh bí ẩn đang nhấp nháy</span>
+          <span id="qCount" class="muted"></span>
+        </div>
+        <h3 id="question">Đang tải câu hỏi…</h3>
+        <div id="options" class="options"></div>
+        <div id="feedback" class="feedback" hidden></div>
+        <button id="nextBtn" class="btn primary wide" hidden>Câu tiếp theo →</button>
+      </section>
+
+      <section class="card info-card" id="info">
+        <div class="info-empty">
+          <div class="big">🌙</div>
+          <p>Bản đồ đang chìm trong bóng tối.<br />Trả lời đúng để thắp sáng tỉnh đầu tiên!</p>
+        </div>
+      </section>
+    </div>
+  </main>
+
+  <div id="toast" class="toast" role="status" aria-live="polite"></div>
+  <div id="confetti" class="confetti" aria-hidden="true"></div>
+
+  <!-- Kho câu hỏi -->
+  <div id="bank" class="modal" hidden>
+    <div class="sheet">
+      <div class="sheet-head">
+        <h2>📚 Kho câu hỏi</h2>
+        <button class="x" data-close aria-label="Đóng">✕</button>
+      </div>
+      <form id="addForm" class="add-form">
+        <h4>➕ Thêm câu hỏi của bạn</h4>
+        <p class="muted small">Đáp án đúng là tỉnh thành bạn chọn. 3 đáp án nhiễu được tạo tự động.</p>
+        <label class="field"><span>Câu hỏi</span>
+          <textarea id="fQ" rows="2" required placeholder="Ví dụ: Bánh đa cua là món ngon nổi tiếng của địa phương nào?"></textarea>
+        </label>
+        <label class="field"><span>Đáp án đúng (tỉnh thành)</span>
+          <select id="fP" required></select>
+        </label>
+        <button class="btn primary" type="submit">Thêm vào bộ sưu tập</button>
+      </form>
+      <div class="bank-tools">
+        <button id="exportBtn" class="btn sm" type="button">⬇️ Xuất JSON</button>
+        <label class="btn sm" for="importFile">⬆️ Nhập JSON</label>
+        <input id="importFile" type="file" accept="application/json,.json" hidden />
+        <button id="resetBtn" class="btn sm danger" type="button">🌑 Tắt đèn, chơi lại</button>
+      </div>
+      <div class="list-head">
+        <input id="search" type="search" placeholder="🔍 Tìm câu hỏi hoặc tỉnh…" />
+        <span id="listCount" class="muted"></span>
+      </div>
+      <ul id="qList" class="q-list"></ul>
+    </div>
+  </div>
+
+  <!-- Huy hiệu -->
+  <div id="badgeModal" class="modal" hidden>
+    <div class="sheet small center">
+      <div class="sheet-head"><span></span><button class="x" data-close aria-label="Đóng">✕</button></div>
+      <h2 id="badgeTitle">Người Việt Nam chất!</h2>
+      <p id="badgeText" class="muted"></p>
+      <div id="badgeArt" class="badge-art"></div>
+      <div id="badgeForm" class="badge-form">
+        <input id="badgeName" type="text" maxlength="28" placeholder="Nhập tên của bạn để in lên huy hiệu" />
+        <button id="badgeDl" class="btn primary" type="button">⬇️ Tải huy hiệu (PNG)</button>
+      </div>
+    </div>
+  </div>
+
+  <script src="map-data.js"></script>
+  <script src="provinces.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>

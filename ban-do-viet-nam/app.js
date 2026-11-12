@@ -12,6 +12,7 @@
   const save = (k, v) => { try { localStorage.setItem(k, JSON.stringify(v)); } catch { /* bỏ qua */ } };
   const shuffle = (a) => { for (let i = a.length - 1; i > 0; i--) { const j = (Math.random() * (i + 1)) | 0; [a[i], a[j]] = [a[j], a[i]]; } return a; };
   const pick = (a) => a[(Math.random() * a.length) | 0];
+  const sfx = (name) => window.SFX && window.SFX.play(name);
   const esc = (s) => String(s).replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
 
   // ---------- Dữ liệu ----------
@@ -109,7 +110,7 @@
     const t = e.target.closest('.prov');
     if (!t) return;
     const id = t.dataset.id;
-    if (isLit(id)) showInfo(id);
+    if (isLit(id)) { sfx('click'); showInfo(id); }
     else toast('🌑 Tỉnh này còn tối. Trả lời đúng để thắp sáng nhé!');
   });
 
@@ -224,6 +225,7 @@
     fb.className = 'feedback ' + (ok ? 'good' : 'bad');
     if (ok) {
       state.correct++; state.streak++; state.best = Math.max(state.best, state.streak);
+      sfx(state.streak >= 3 && state.streak % 3 === 0 ? 'streak' : 'ok');
       if (!current.bonus && !isLit(p.id)) {
         state.lit.push(p.id);
         fb.textContent = `${pick(CHEERS)} ✨ ${p.name} đã sáng đèn!` + (state.streak >= 3 ? ` (chuỗi ${state.streak} câu)` : '');
@@ -233,17 +235,19 @@
         const path = paths[p.id];
         path.classList.remove('flash'); void path.getBBox(); path.classList.add('flash');
         showInfo(p.id);
+        setTimeout(() => sfx('sparkle'), 180);
         toast(`💡 Thắp sáng ${p.name}! (${state.lit.length}/${TOTAL})`);
         if (state.lit.length === TOTAL && !state.badge) {
           state.badge = new Date().toLocaleDateString('vi-VN');
           persist();
-          setTimeout(() => { confetti(); openBadge(true); }, 1200);
+          setTimeout(() => { confetti(); openBadge(true); sfx('win'); }, 1200);
         }
       } else {
         fb.textContent = `${pick(CHEERS)} Đáp án là ${p.name}.`;
       }
     } else {
       state.wrong++; state.streak = 0;
+      sfx('bad');
       fb.textContent = `Tiếc quá 🥺 Đáp án đúng là ${p.name}. Tỉnh này vẫn còn tối, sẽ quay lại sau nhé!`;
       const path = paths[p.id];
       path.classList.remove('miss'); void path.getBBox(); path.classList.add('miss');
@@ -411,7 +415,11 @@
   });
 
   // ---------- Bàn phím ----------
-  $('#nextBtn').addEventListener('click', nextQuestion);
+  $('#nextBtn').addEventListener('click', () => { sfx('click'); nextQuestion(); });
+  const soundBtn = $('#soundBtn');
+  const renderSound = () => { soundBtn.textContent = window.SFX && window.SFX.muted ? '🔇' : '🔊'; };
+  soundBtn.addEventListener('click', () => { if (window.SFX) { window.SFX.toggle(); renderSound(); sfx('click'); } });
+  renderSound();
   document.addEventListener('keydown', (e) => {
     const modalOpen = [...document.querySelectorAll('.modal')].some((m) => !m.hidden);
     if (modalOpen) { if (e.key === 'Escape') document.querySelectorAll('.modal').forEach((m) => { m.hidden = true; }); return; }

@@ -4,117 +4,98 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Xây Gạch Triết Học</title>
-  <meta name="description" content="Trả lời câu hỏi triết học, mỗi câu đúng xây thêm một viên gạch cho 3 mô hình triết học dễ thương." />
-  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🧱</text></svg>" />
+  <meta name="description" content="Trả lời câu hỏi triết học. Mỗi câu đúng thả một khối đá xuống công trình 3D." />
+  <meta name="theme-color" content="#06070b" />
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'><rect width='64' height='64' rx='12' fill='%2306070b'/><path d='M12 44h40v8H12zM18 20h4v22h-4zM30 20h4v22h-4zM42 20h4v22h-4zM10 18l22-10 22 10z' fill='%23d9ad55'/></svg>" />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@500;600;700;800&display=swap" rel="stylesheet" />
-  <link rel="stylesheet" href="style.css?v=2" />
+  <link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;600;700&family=Oswald:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="style.css?v=9" />
+  <script type="importmap">
+    { "imports": {
+      "three": "https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js",
+      "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.160.0/examples/jsm/"
+    } }
+  </script>
 </head>
 <body>
   <header class="top">
     <div class="brand">
       <svg class="logo" viewBox="0 0 64 64" aria-hidden="true">
-        <rect x="6" y="38" width="25" height="15" rx="4" fill="#f08a5d" stroke="#5b4636" stroke-width="3"/>
-        <rect x="33" y="38" width="25" height="15" rx="4" fill="#f6b26b" stroke="#5b4636" stroke-width="3"/>
-        <rect x="19" y="21" width="26" height="15" rx="4" fill="#ffd36e" stroke="#5b4636" stroke-width="3"/>
-        <rect x="24" y="5" width="16" height="14" rx="4" fill="#ff9eb1" stroke="#5b4636" stroke-width="3"/>
-        <circle cx="29" cy="28" r="1.8" fill="#5b4636"/><circle cx="35" cy="28" r="1.8" fill="#5b4636"/>
-        <path d="M29.5,31.5 Q32,33.5 34.5,31.5" fill="none" stroke="#5b4636" stroke-width="1.8" stroke-linecap="round"/>
+        <path d="M10 46h44v7H10zM17 22h5v22h-5zM29.5 22h5v22h-5zM42 22h5v22h-5zM8 20l24-11 24 11z" fill="currentColor"/>
       </svg>
       <div>
-        <h1>Xây Gạch <span>Triết Học</span></h1>
-        <p>Mỗi câu trả lời đúng là một viên gạch</p>
+        <h1>Xây Gạch <b>Triết Học</b></h1>
+        <p>Mỗi câu trả lời đúng là một khối đá</p>
       </div>
     </div>
     <div class="stats">
-      <div class="stat"><span class="ic">🧱</span><b id="score">0</b><span class="lb">viên gạch</span></div>
-      <div class="stat"><span class="ic">🔥</span><b id="streak">0</b><span class="lb">chuỗi đúng</span></div>
-      <button id="soundBtn" class="icon-btn" type="button" title="Bật/tắt âm thanh" aria-label="Bật/tắt âm thanh">🔊</button>
-      <button id="openBank" class="btn soft" hidden>📚 Kho câu hỏi</button>
+      <div class="stat"><span>Gạch</span><b id="score">00</b></div>
+      <div class="stat"><span>Chuỗi</span><b id="streak">00</b></div>
+      <button id="soundBtn" class="icon-btn" type="button" aria-label="Bật/tắt âm thanh" title="Bật/tắt âm thanh">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 9v6h4l5 4V5L8 9z" fill="currentColor"/><path class="waves" d="M16 8.5a5 5 0 0 1 0 7M18.5 6a8.5 8.5 0 0 1 0 12" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/><path class="cross" d="M16 9l5 6M21 9l-5 6" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
+      </button>
+      <button id="openBank" class="btn ghost" hidden>Kho câu hỏi</button>
     </div>
   </header>
 
-  <nav id="tabs" class="tabs" aria-label="Chọn mô hình"></nav>
+  <nav id="tabs" class="tabs" aria-label="Chọn công trình"></nav>
 
   <main class="layout">
-    <section class="card stage-card" id="stageCard">
-      <div class="stage-head">
-        <div class="titles">
+    <section class="stage-col">
+      <div class="stage" id="stageBox">
+        <div id="canvasHost" class="canvas-host"></div>
+        <div class="vignette"></div>
+        <div class="hud tl">
+          <span class="kicker" id="modelKicker">Công trình I</span>
           <h2 id="modelName"></h2>
-          <p id="modelDesc" class="desc"></p>
         </div>
-        <span id="modelProgress" class="pill"></span>
+        <div class="hud tr"><b id="modelProgress">00</b><span id="modelTotal">/ 10</span></div>
+        <div class="hud bl" id="lastBrick"></div>
+        <div class="hud br">Kéo để xoay</div>
+        <div class="bar top-bar"></div>
+        <div class="bar bottom-bar"></div>
+        <div class="cine" id="cine" hidden>
+          <span class="kicker" id="cineKicker">Công trình hoàn thành</span>
+          <h2 id="cineTitle"></h2>
+          <p id="cineFact"></p>
+          <div class="cine-btns" id="cineBtns"></div>
+        </div>
+        <div class="no3d" id="no3d" hidden>Không tải được đồ họa 3D. Bạn vẫn trả lời câu hỏi được, tiến độ vẫn được tính.</div>
       </div>
-      <div class="stage">
-        <svg id="stage" viewBox="-20 -20 360 360" role="img" aria-label="Mô hình đang xây"></svg>
-      </div>
-      <div class="bar"><div id="bar"></div></div>
+      <div id="meter" class="meter" aria-hidden="true"></div>
+      <p id="modelDesc" class="desc"></p>
     </section>
 
-    <section class="card quiz-card">
-      <div class="guide">
-        <svg id="owl" class="owl" viewBox="0 0 80 84" aria-hidden="true">
-          <g class="owl-body">
-            <path d="M22,26 L18,8 L32,20 Z M58,26 L62,8 L48,20 Z" fill="#b98760" stroke="#5b4636" stroke-width="3" stroke-linejoin="round"/>
-            <ellipse cx="40" cy="48" rx="28" ry="30" fill="#d4a373" stroke="#5b4636" stroke-width="3"/>
-            <ellipse cx="40" cy="58" rx="17" ry="17" fill="#fbe6c8"/>
-            <path d="M33,56 q3,3 6,0 M41,62 q3,3 6,0 M33,66 q3,3 6,0" fill="none" stroke="#e3c39a" stroke-width="2" stroke-linecap="round"/>
-            <ellipse cx="14" cy="52" rx="6" ry="13" fill="#b98760" stroke="#5b4636" stroke-width="3" class="wing-l"/>
-            <ellipse cx="66" cy="52" rx="6" ry="13" fill="#b98760" stroke="#5b4636" stroke-width="3" class="wing-r"/>
-            <g class="eyes-open">
-              <circle cx="29" cy="38" r="10" fill="#fff" stroke="#5b4636" stroke-width="3"/>
-              <circle cx="51" cy="38" r="10" fill="#fff" stroke="#5b4636" stroke-width="3"/>
-              <circle class="pupil" cx="30" cy="39" r="4.5" fill="#5b4636"/>
-              <circle class="pupil" cx="50" cy="39" r="4.5" fill="#5b4636"/>
-              <circle cx="31.5" cy="37" r="1.5" fill="#fff"/><circle cx="51.5" cy="37" r="1.5" fill="#fff"/>
-            </g>
-            <g class="eyes-happy" fill="none" stroke="#5b4636" stroke-width="3.5" stroke-linecap="round">
-              <path d="M22,40 Q29,31 36,40"/><path d="M44,40 Q51,31 58,40"/>
-            </g>
-            <path d="M36,46 L44,46 L40,53 Z" fill="#f2a541" stroke="#5b4636" stroke-width="2" stroke-linejoin="round"/>
-            <ellipse cx="22" cy="49" rx="4" ry="2.5" fill="#f79a9a" opacity=".8"/>
-            <ellipse cx="58" cy="49" rx="4" ry="2.5" fill="#f79a9a" opacity=".8"/>
-            <path class="tear" d="M57,46 q3,6 0,8 q-3,-2 0,-8Z" fill="#8ecbff"/>
-            <path d="M24,22 L40,14 L56,22 L40,30 Z" fill="#5b4636"/>
-            <rect x="33" y="22" width="14" height="6" rx="2" fill="#5b4636"/>
-            <path d="M56,22 L58,32" stroke="#f2a541" stroke-width="2.5" stroke-linecap="round"/><circle cx="58" cy="33" r="2.5" fill="#f2a541"/>
-            <path d="M30,79 l-3,4 M34,79 l0,4 M46,79 l0,4 M50,79 l3,4" stroke="#f2a541" stroke-width="3" stroke-linecap="round"/>
-          </g>
-        </svg>
-        <div class="bubble" id="bubble">Chào bạn! Mình là Cú Thông Thái. Trả lời đúng để mình đặt gạch nhé!</div>
-      </div>
+    <section class="quiz">
       <div class="q-meta">
-        <span id="qTag" class="pill">Câu hỏi</span>
-        <span id="qCount" class="muted"></span>
+        <span id="qCount" class="kicker">Câu 01</span>
+        <span id="qTag" class="tag" hidden>Câu của bạn</span>
       </div>
       <h3 id="question">Đang tải câu hỏi…</h3>
       <div id="options" class="options"></div>
       <div id="feedback" class="feedback" hidden></div>
-      <button id="nextBtn" class="btn primary wide" hidden>Câu tiếp theo →</button>
-      <p class="hint muted">Mẹo: bấm phím 1–4 để chọn, Enter để sang câu tiếp.</p>
+      <button id="nextBtn" class="btn primary wide" hidden>Câu tiếp theo</button>
+      <p class="hint">Phím 1–4 để chọn · Enter để sang câu tiếp</p>
     </section>
   </main>
 
   <div id="toast" class="toast" role="status" aria-live="polite"></div>
-  <div id="confetti" class="confetti" aria-hidden="true"></div>
 
-  <!-- Kho câu hỏi -->
+  <!-- Kho câu hỏi (chỉ hiện khi mở trang kèm ?admin) -->
   <div id="bank" class="modal" hidden>
     <div class="sheet">
       <div class="sheet-head">
-        <h2>📚 Kho câu hỏi</h2>
+        <h2>Kho câu hỏi</h2>
         <button class="x" data-close aria-label="Đóng">✕</button>
       </div>
-
       <form id="addForm" class="add-form">
-        <h4>➕ Thêm câu hỏi của bạn</h4>
-        <label class="field">
-          <span>Câu hỏi</span>
+        <h4>Thêm câu hỏi</h4>
+        <label class="field"><span>Câu hỏi</span>
           <textarea id="fQ" rows="2" required placeholder="Ví dụ: Ai là tác giả của “Đạo Đức Kinh”?"></textarea>
         </label>
         <div class="field">
-          <span>Đáp án <small class="muted">(chấm tròn = đáp án đúng, cần ít nhất 2 đáp án)</small></span>
+          <span>Đáp án <small>(chấm tròn = đáp án đúng, cần ít nhất 2 đáp án)</small></span>
           <div class="opt-inputs">
             <label class="opt-in"><input type="radio" name="fC" value="0" checked /><input type="text" class="fA" placeholder="Đáp án A" /></label>
             <label class="opt-in"><input type="radio" name="fC" value="1" /><input type="text" class="fA" placeholder="Đáp án B" /></label>
@@ -122,49 +103,36 @@
             <label class="opt-in"><input type="radio" name="fC" value="3" /><input type="text" class="fA" placeholder="Đáp án D (không bắt buộc)" /></label>
           </div>
         </div>
-        <label class="field">
-          <span>Giải thích <small class="muted">(không bắt buộc)</small></span>
+        <label class="field"><span>Giải thích <small>(không bắt buộc)</small></span>
           <input id="fE" type="text" placeholder="Một câu ngắn hiện ra sau khi trả lời" />
         </label>
         <button class="btn primary" type="submit">Thêm vào bộ sưu tập</button>
       </form>
-
       <div class="bank-tools">
-        <label class="mode">Chơi với:
+        <label class="mode">Chơi với
           <select id="mode">
             <option value="all">Tất cả câu hỏi</option>
             <option value="custom">Chỉ câu tôi thêm</option>
           </select>
         </label>
         <div class="tool-btns">
-          <button id="exportBtn" class="btn soft sm" type="button">⬇️ Xuất JSON</button>
-          <label class="btn soft sm" for="importFile">⬆️ Nhập JSON</label>
+          <button id="exportBtn" class="btn ghost sm" type="button">Xuất JSON</button>
+          <label class="btn ghost sm" for="importFile">Nhập JSON</label>
           <input id="importFile" type="file" accept="application/json,.json" hidden />
-          <button id="resetBtn" class="btn soft sm danger" type="button">↺ Xây lại từ đầu</button>
+          <button id="resetBtn" class="btn ghost sm danger" type="button">Xây lại từ đầu</button>
         </div>
       </div>
-
       <div class="list-head">
-        <input id="search" type="search" placeholder="🔍 Tìm câu hỏi…" />
-        <span id="listCount" class="muted"></span>
+        <input id="search" type="search" placeholder="Tìm câu hỏi…" />
+        <span id="listCount"></span>
       </div>
       <ul id="qList" class="q-list"></ul>
     </div>
   </div>
 
-  <!-- Hoàn thành mô hình -->
-  <div id="win" class="modal" hidden>
-    <div class="sheet small center">
-      <div class="win-emoji" id="winEmoji">🏛️</div>
-      <h2 id="winTitle"></h2>
-      <svg id="winSvg" class="win-svg" viewBox="-20 -20 360 360"></svg>
-      <p id="winFact" class="desc"></p>
-      <div class="win-btns" id="winBtns"></div>
-    </div>
-  </div>
-
-  <script src="questions.js?v=2"></script>
-  <script src="models.js?v=2"></script>
-  <script src="app.js?v=2"></script>
+  <script src="sfx.js?v=9"></script>
+  <script src="questions.js?v=9"></script>
+  <script src="models.js?v=9"></script>
+  <script type="module" src="app.js?v=9"></script>
 </body>
 </html>

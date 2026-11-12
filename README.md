@@ -15,8 +15,10 @@ Web tĩnh thuần HTML/CSS/JS, không cần build.
 | `index.html` | Giao diện |
 | `style.css` | Kiểu dáng |
 | `app.js` | Logic game, kho câu hỏi, lưu tiến độ |
+| `scene.js` | Cảnh 3D (three.js tải từ CDN jsDelivr): ánh sáng, camera, gạch rơi |
+| `sfx.js` | Hiệu ứng âm thanh tạo bằng Web Audio, không cần file nhạc |
 | `questions.js` | Bộ câu hỏi mặc định (50 câu) |
-| `models.js` | Hình vẽ SVG của 3 mô hình, mỗi phần tử là 1 viên gạch |
+| `models.js` | Khối 3D của 3 công trình, mỗi phần tử là 1 viên gạch |
 
 ## Thêm câu hỏi
 

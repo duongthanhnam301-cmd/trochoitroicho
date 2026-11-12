@@ -9,20 +9,28 @@
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@500;600;700;800&display=swap" rel="stylesheet" />
-  <link rel="stylesheet" href="style.css" />
+  <link rel="stylesheet" href="style.css?v=2" />
 </head>
 <body>
   <header class="top">
     <div class="brand">
-      <span class="logo">🧱</span>
+      <svg class="logo" viewBox="0 0 64 64" aria-hidden="true">
+        <rect x="6" y="38" width="25" height="15" rx="4" fill="#f08a5d" stroke="#5b4636" stroke-width="3"/>
+        <rect x="33" y="38" width="25" height="15" rx="4" fill="#f6b26b" stroke="#5b4636" stroke-width="3"/>
+        <rect x="19" y="21" width="26" height="15" rx="4" fill="#ffd36e" stroke="#5b4636" stroke-width="3"/>
+        <rect x="24" y="5" width="16" height="14" rx="4" fill="#ff9eb1" stroke="#5b4636" stroke-width="3"/>
+        <circle cx="29" cy="28" r="1.8" fill="#5b4636"/><circle cx="35" cy="28" r="1.8" fill="#5b4636"/>
+        <path d="M29.5,31.5 Q32,33.5 34.5,31.5" fill="none" stroke="#5b4636" stroke-width="1.8" stroke-linecap="round"/>
+      </svg>
       <div>
-        <h1>Xây Gạch Triết Học</h1>
-        <p>Trả lời đúng thì đặt thêm một viên gạch</p>
+        <h1>Xây Gạch <span>Triết Học</span></h1>
+        <p>Mỗi câu trả lời đúng là một viên gạch</p>
       </div>
     </div>
     <div class="stats">
-      <div class="stat"><b id="score">0</b><span>viên gạch</span></div>
-      <div class="stat"><b id="streak">0</b><span>chuỗi 🔥</span></div>
+      <div class="stat"><span class="ic">🧱</span><b id="score">0</b><span class="lb">viên gạch</span></div>
+      <div class="stat"><span class="ic">🔥</span><b id="streak">0</b><span class="lb">chuỗi đúng</span></div>
+      <button id="soundBtn" class="icon-btn" type="button" title="Bật/tắt âm thanh" aria-label="Bật/tắt âm thanh">🔊</button>
       <button id="openBank" class="btn soft" hidden>📚 Kho câu hỏi</button>
     </div>
   </header>
@@ -32,10 +40,12 @@
   <main class="layout">
     <section class="card stage-card" id="stageCard">
       <div class="stage-head">
-        <h2 id="modelName"></h2>
+        <div class="titles">
+          <h2 id="modelName"></h2>
+          <p id="modelDesc" class="desc"></p>
+        </div>
         <span id="modelProgress" class="pill"></span>
       </div>
-      <p id="modelDesc" class="desc"></p>
       <div class="stage">
         <svg id="stage" viewBox="-20 -20 360 360" role="img" aria-label="Mô hình đang xây"></svg>
       </div>
@@ -43,6 +53,37 @@
     </section>
 
     <section class="card quiz-card">
+      <div class="guide">
+        <svg id="owl" class="owl" viewBox="0 0 80 84" aria-hidden="true">
+          <g class="owl-body">
+            <path d="M22,26 L18,8 L32,20 Z M58,26 L62,8 L48,20 Z" fill="#b98760" stroke="#5b4636" stroke-width="3" stroke-linejoin="round"/>
+            <ellipse cx="40" cy="48" rx="28" ry="30" fill="#d4a373" stroke="#5b4636" stroke-width="3"/>
+            <ellipse cx="40" cy="58" rx="17" ry="17" fill="#fbe6c8"/>
+            <path d="M33,56 q3,3 6,0 M41,62 q3,3 6,0 M33,66 q3,3 6,0" fill="none" stroke="#e3c39a" stroke-width="2" stroke-linecap="round"/>
+            <ellipse cx="14" cy="52" rx="6" ry="13" fill="#b98760" stroke="#5b4636" stroke-width="3" class="wing-l"/>
+            <ellipse cx="66" cy="52" rx="6" ry="13" fill="#b98760" stroke="#5b4636" stroke-width="3" class="wing-r"/>
+            <g class="eyes-open">
+              <circle cx="29" cy="38" r="10" fill="#fff" stroke="#5b4636" stroke-width="3"/>
+              <circle cx="51" cy="38" r="10" fill="#fff" stroke="#5b4636" stroke-width="3"/>
+              <circle class="pupil" cx="30" cy="39" r="4.5" fill="#5b4636"/>
+              <circle class="pupil" cx="50" cy="39" r="4.5" fill="#5b4636"/>
+              <circle cx="31.5" cy="37" r="1.5" fill="#fff"/><circle cx="51.5" cy="37" r="1.5" fill="#fff"/>
+            </g>
+            <g class="eyes-happy" fill="none" stroke="#5b4636" stroke-width="3.5" stroke-linecap="round">
+              <path d="M22,40 Q29,31 36,40"/><path d="M44,40 Q51,31 58,40"/>
+            </g>
+            <path d="M36,46 L44,46 L40,53 Z" fill="#f2a541" stroke="#5b4636" stroke-width="2" stroke-linejoin="round"/>
+            <ellipse cx="22" cy="49" rx="4" ry="2.5" fill="#f79a9a" opacity=".8"/>
+            <ellipse cx="58" cy="49" rx="4" ry="2.5" fill="#f79a9a" opacity=".8"/>
+            <path class="tear" d="M57,46 q3,6 0,8 q-3,-2 0,-8Z" fill="#8ecbff"/>
+            <path d="M24,22 L40,14 L56,22 L40,30 Z" fill="#5b4636"/>
+            <rect x="33" y="22" width="14" height="6" rx="2" fill="#5b4636"/>
+            <path d="M56,22 L58,32" stroke="#f2a541" stroke-width="2.5" stroke-linecap="round"/><circle cx="58" cy="33" r="2.5" fill="#f2a541"/>
+            <path d="M30,79 l-3,4 M34,79 l0,4 M46,79 l0,4 M50,79 l3,4" stroke="#f2a541" stroke-width="3" stroke-linecap="round"/>
+          </g>
+        </svg>
+        <div class="bubble" id="bubble">Chào bạn! Mình là Cú Thông Thái. Trả lời đúng để mình đặt gạch nhé!</div>
+      </div>
       <div class="q-meta">
         <span id="qTag" class="pill">Câu hỏi</span>
         <span id="qCount" class="muted"></span>
@@ -122,8 +163,8 @@
     </div>
   </div>
 
-  <script src="questions.js"></script>
-  <script src="models.js"></script>
-  <script src="app.js"></script>
+  <script src="questions.js?v=2"></script>
+  <script src="models.js?v=2"></script>
+  <script src="app.js?v=2"></script>
 </body>
 </html>

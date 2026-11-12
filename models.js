@@ -11,8 +11,13 @@ const face = (cx, cy, gap = 14) => `
   <ellipse cx="${cx - gap - 9}" cy="${cy + 7}" rx="5.5" ry="3.2" fill="#f79a9a" opacity=".75"/>
   <ellipse cx="${cx + gap + 9}" cy="${cy + 7}" rx="5.5" ry="3.2" fill="#f79a9a" opacity=".75"/>`;
 
+// Vân gạch (đường vữa) phủ lên viên gạch; pattern #mortar được định nghĩa trong khung cảnh (app.js)
+const tex = (x, y, w, h, rx = 7) => `
+  <rect x="${x + 1.5}" y="${y + 1.5}" width="${w - 3}" height="${h - 3}" rx="${rx}" fill="url(#mortar)" opacity=".55"/>
+  <rect x="${x + 4}" y="${y + 3}" width="${w - 8}" height="4" rx="2" fill="#fff" opacity=".45"/>`;
+
 const labelBrick = (x, y, w, h, fill, text, size = 13) => `
-  <rect class="o" x="${x}" y="${y}" width="${w}" height="${h}" rx="7" fill="${fill}"/>
+  <rect class="o" x="${x}" y="${y}" width="${w}" height="${h}" rx="7" fill="${fill}"/>${tex(x, y, w, h)}
   <text x="${x + w / 2}" y="${y + h / 2 + 1}" font-size="${size}">${text}</text>`;
 
 const column = (x) => `
@@ -47,12 +52,13 @@ const MODELS = [
     emoji: '🏛️',
     name: 'Đền Triết Học Hy Lạp',
     short: 'Hy Lạp',
+    scene: 'day',
     desc: 'Ngôi đền của lý trí: nơi Thales, Socrates, Plato và Aristotle đặt nền móng cho triết học phương Tây.',
     fact: 'Con cú là biểu tượng của nữ thần trí tuệ Athena. Hegel từng viết: “Con cú của thần Minerva chỉ cất cánh khi hoàng hôn buông xuống”, ý nói triết học hiểu được một thời đại khi thời đại ấy đã chín muồi.',
     bricks: [
-      { label: 'Bậc nền: Sự ngạc nhiên', svg: `<rect class="o" x="36" y="278" width="248" height="22" rx="7" fill="#f6d2a0"/>` },
-      { label: 'Bậc hai: Sự hoài nghi', svg: `<rect class="o" x="52" y="256" width="216" height="22" rx="7" fill="#f9e0b8"/>` },
-      { label: 'Sàn đền: Lý trí', svg: `<rect class="o" x="66" y="238" width="188" height="18" rx="6" fill="#fcebd0"/>` },
+      { label: 'Bậc nền: Sự ngạc nhiên', svg: `<rect class="o" x="36" y="278" width="248" height="22" rx="7" fill="#f6d2a0"/>${tex(36, 278, 248, 22)}` },
+      { label: 'Bậc hai: Sự hoài nghi', svg: `<rect class="o" x="52" y="256" width="216" height="22" rx="7" fill="#f9e0b8"/>${tex(52, 256, 216, 22)}` },
+      { label: 'Sàn đền: Lý trí', svg: `<rect class="o" x="66" y="238" width="188" height="18" rx="6" fill="#fcebd0"/>${tex(66, 238, 188, 18, 6)}` },
       { label: 'Cột Thales', svg: column(89) },
       { label: 'Cột Socrates', svg: column(129) },
       { label: 'Cột Plato', svg: column(169) },
@@ -75,6 +81,7 @@ const MODELS = [
     emoji: '🏠',
     name: 'Ngôi Nhà Duy Vật Lịch Sử',
     short: 'Duy vật lịch sử',
+    scene: 'sunset',
     desc: 'Mô hình Cơ sở hạ tầng – Kiến trúc thượng tầng của Mác: kinh tế là móng nhà, chính trị và tư tưởng là phần nhà phía trên.',
     fact: 'Cơ sở hạ tầng quyết định kiến trúc thượng tầng, còn kiến trúc thượng tầng tác động trở lại cơ sở hạ tầng. Móng vững thì nhà mới vững, và mái nhà cũng che chở cho móng.',
     bricks: [
@@ -105,6 +112,7 @@ const MODELS = [
     emoji: '☯️',
     name: 'Thái Cực Âm Dương Bát Quái',
     short: 'Âm Dương',
+    scene: 'night',
     desc: 'Mô hình triết học phương Đông: Âm và Dương đối lập mà thống nhất, bao quanh là tám quẻ tượng trưng cho vạn vật.',
     fact: '“Trong Âm có Dương, trong Dương có Âm.” Hai chấm nhỏ trên Thái Cực Đồ cho thấy không có gì thuần túy tuyệt đối. Mọi sự vật đều chứa mầm mống của mặt đối lập và có thể chuyển hóa sang nó.',
     bricks: [

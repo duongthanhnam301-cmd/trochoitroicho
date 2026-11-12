@@ -71,6 +71,7 @@
     });
     $('#feedback').hidden = true;
     $('#nextBtn').hidden = true;
+    if (asked > 1) owlSay(null, pick(OWL_ASK));
   }
 
   function answer(i) {
@@ -92,10 +93,14 @@
       state.streak++;
       state.best = Math.max(state.best, state.streak);
       head.textContent = pick(CHEERS) + (state.streak >= 3 ? ` Chuỗi ${state.streak} câu liền!` : '');
+      owlSay('happy', state.streak >= 3 ? `Chuỗi ${state.streak} câu đúng liền! Bạn cháy quá! 🔥` : pick(OWL_OK));
+      sound('ok');
       placeBrick();
     } else {
       state.streak = 0;
       head.textContent = `Ôi, chưa đúng rồi 🥺 Đáp án: ${current.opts[current.correct]}`;
+      owlSay('sad', pick(OWL_BAD));
+      sound('bad');
       const card = $('#stageCard');
       card.classList.remove('shake'); void card.offsetWidth; card.classList.add('shake');
     }
@@ -129,7 +134,11 @@
     const idx = state.placed[m];
     state.placed[m]++;
     const el = $('#stage').querySelector(`.real .brick[data-i="${idx}"]`);
-    if (el) el.classList.add('on', 'drop');
+    if (el) {
+      el.classList.add('on', 'drop');
+      setTimeout(() => dust(el), 380);
+      setTimeout(() => sound('pop'), 380);
+    }
     updateGhost();
     renderProgress();
     renderTabs();
@@ -137,14 +146,125 @@
     if (isDone(m)) setTimeout(() => showWin(m), 900);
   }
 
+  // ---------- Khung cảnh phía sau mô hình ----------
+  const SCENES = {
+    day: { sky: ['#a9dcff', '#fff4dd'], hill: ['#bfe5a0', '#9fd282'], cloud: '#ffffff' },
+    sunset: { sky: ['#ffc6a8', '#fff0d4'], hill: ['#cfe6a0', '#b5d886'], cloud: '#fff3ea' },
+    night: { sky: ['#bdb6f2', '#fde6f1'], hill: null, cloud: '#f4f0ff' },
+  };
+  function sceneSvg(type) {
+    const s = SCENES[type] || SCENES.day;
+    const id = 'sky-' + type;
+    let out = `<defs>
+      <linearGradient id="${id}" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="${s.sky[0]}"/><stop offset="1" stop-color="${s.sky[1]}"/></linearGradient>
+      <radialGradient id="glow-${type}"><stop offset="0" stop-color="#fff" stop-opacity=".85"/><stop offset="1" stop-color="#fff" stop-opacity="0"/></radialGradient>
+      <pattern id="mortar" width="24" height="12" patternUnits="userSpaceOnUse">
+        <path d="M0,11.5 H24 M12,0 V6 M0,6 H24 M0,6 V12 M24,6 V12" stroke="#5b4636" stroke-width="1" opacity=".22" fill="none"/>
+      </pattern></defs>
+      <rect x="-20" y="-20" width="360" height="360" fill="url(#${id})"/>`;
+    const cloud = (x, y, k, cls) => `<g class="cloud ${cls}" transform="translate(${x} ${y}) scale(${k})"><g fill="${s.cloud}" opacity=".95">
+      <ellipse cx="0" cy="10" rx="26" ry="11"/><circle cx="-10" cy="4" r="11"/><circle cx="8" cy="0" r="14"/><circle cx="22" cy="7" r="9"/></g></g>`;
+    if (type === 'day') {
+      out += `<g class="sun" transform="translate(296 14)"><g class="rays" stroke="#ffd36e" stroke-width="4" stroke-linecap="round">
+        ${[0, 45, 90, 135, 180, 225, 270, 315].map((a) => `<line x1="0" y1="-27" x2="0" y2="-35" transform="rotate(${a})"/>`).join('')}</g>
+        <circle r="20" fill="#ffe08a" stroke="#f2b84b" stroke-width="3"/></g>`;
+      out += cloud(40, 30, 1, 'c1') + cloud(250, 70, 0.7, 'c2');
+    } else if (type === 'sunset') {
+      out += `<circle cx="280" cy="60" r="70" fill="url(#glow-sunset)"/>`;
+      out += cloud(250, 40, 0.9, 'c1') + cloud(120, 6, 0.6, 'c2');
+      out += `<g fill="none" stroke="#8a6a58" stroke-width="2" stroke-linecap="round" class="birds">
+        <path d="M200,30 q5,-5 10,0 q5,-5 10,0"/><path d="M226,44 q4,-4 8,0 q4,-4 8,0"/></g>`;
+    } else {
+      out += `<circle cx="160" cy="160" r="120" fill="url(#glow-night)"/>`;
+      const stars = [[10, 10], [60, -4], [110, 30], [230, 0], [300, 40], [320, 120], [-6, 120], [20, 230], [310, 230], [270, 300], [40, 300], [180, -10]];
+      out += stars.map(([x, y], i) => `<path class="twinkle" style="animation-delay:${(i * 0.37) % 2}s" d="M${x},${y - 5} L${x + 1.5},${y - 1.5} L${x + 5},${y} L${x + 1.5},${y + 1.5} L${x},${y + 5} L${x - 1.5},${y + 1.5} L${x - 5},${y} L${x - 1.5},${y - 1.5}Z" fill="#fff"/>`).join('');
+      out += `<path d="M304,-6 a18,18 0 1,0 14,26 a14,14 0 1,1 -14,-26Z" fill="#fff3c4" stroke="#e8c870" stroke-width="2"/>`;
+      out += cloud(30, 330, 1.2, 'c1') + cloud(290, 330, 1, 'c2');
+    }
+    if (s.hill) {
+      out += `<path d="M-20,312 Q60,286 150,300 T340,296 V340 H-20Z" fill="${s.hill[0]}"/>
+        <path d="M-20,326 Q90,306 200,318 T340,314 V340 H-20Z" fill="${s.hill[1]}"/>
+        <g class="flowers">${[[-2, 318], [22, 324], [300, 316], [318, 326], [276, 330]].map(([x, y], i) =>
+          `<g transform="translate(${x} ${y})"><line y2="8" stroke="#6aa55a" stroke-width="2"/><circle r="3.6" fill="${['#ff9eb1', '#fff', '#ffd36e'][i % 3]}"/><circle r="1.4" fill="#f2a541"/></g>`).join('')}</g>`;
+    }
+    return out;
+  }
+
   function modelSvg(m, placed, withGhost) {
     const b = MODELS[m].bricks;
-    const shadow = '<ellipse cx="160" cy="312" rx="150" ry="10" fill="#5b4636" opacity=".08"/>';
+    const shadow = sceneSvg(MODELS[m].scene) + '<ellipse cx="160" cy="304" rx="140" ry="9" fill="#5b4636" opacity=".12"/>';
     const ghost = withGhost
       ? `<g class="ghost">${b.map((x, i) => `<g class="gb${i === placed ? ' next' : ''}">${x.svg}</g>`).join('')}</g>`
       : '';
     const real = `<g class="real">${b.map((x, i) => `<g class="brick${i < placed ? ' on' : ''}" data-i="${i}">${x.svg}</g>`).join('')}</g>`;
     return shadow + ghost + real;
+  }
+
+  // Bụi bay ra khi viên gạch chạm chỗ
+  function dust(el) {
+    let bb;
+    try { bb = el.getBBox(); } catch { return; }
+    const svgEl = $('#stage');
+    const g = document.createElementNS('http://www.w3.org/2000/svg', 'g');
+    g.setAttribute('class', 'dust');
+    for (let i = 0; i < 8; i++) {
+      const c = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+      const left = i % 2 === 0;
+      c.setAttribute('cx', left ? bb.x + 4 : bb.x + bb.width - 4);
+      c.setAttribute('cy', bb.y + bb.height - 2);
+      c.setAttribute('r', 3 + Math.random() * 3);
+      c.style.setProperty('--dx', (left ? -1 : 1) * (10 + Math.random() * 18) + 'px');
+      c.style.setProperty('--dy', -(4 + Math.random() * 12) + 'px');
+      g.appendChild(c);
+    }
+    const stars = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+    stars.setAttribute('x', bb.x + bb.width / 2);
+    stars.setAttribute('y', bb.y - 6);
+    stars.setAttribute('class', 'plus');
+    stars.textContent = '+1 🧱';
+    g.appendChild(stars);
+    svgEl.appendChild(g);
+    setTimeout(() => g.remove(), 1100);
+  }
+
+  // ---------- Âm thanh nhỏ (tạo bằng Web Audio, không cần file) ----------
+  let muted = load('xgth_muted', false);
+  let actx = null;
+  function sound(kind) {
+    if (muted) return;
+    try {
+      actx = actx || new (window.AudioContext || window.webkitAudioContext)();
+      const now = actx.currentTime;
+      const notes = { pop: [[520, 0], [780, 0.07]], ok: [[660, 0], [880, 0.09]], bad: [[300, 0], [220, 0.12]], win: [[523, 0], [659, 0.12], [784, 0.24], [1047, 0.36]] }[kind] || [];
+      notes.forEach(([f, t]) => {
+        const o = actx.createOscillator(), gn = actx.createGain();
+        o.type = kind === 'bad' ? 'triangle' : 'sine';
+        o.frequency.setValueAtTime(f, now + t);
+        gn.gain.setValueAtTime(0.0001, now + t);
+        gn.gain.exponentialRampToValueAtTime(0.18, now + t + 0.02);
+        gn.gain.exponentialRampToValueAtTime(0.0001, now + t + 0.22);
+        o.connect(gn).connect(actx.destination);
+        o.start(now + t); o.stop(now + t + 0.25);
+      });
+    } catch { /* trình duyệt không hỗ trợ âm thanh */ }
+  }
+  const soundBtn = $('#soundBtn');
+  const renderSound = () => { soundBtn.textContent = muted ? '🔇' : '🔊'; };
+  soundBtn.addEventListener('click', () => { muted = !muted; save('xgth_muted', muted); renderSound(); });
+  renderSound();
+
+  // ---------- Cú Thông Thái ----------
+  const OWL_OK = ['Tuyệt vời! Gạch mới đây!', 'Giỏi quá đi! Thêm một viên nè!', 'Chuẩn không cần chỉnh!', 'Bạn thông thái ghê!'];
+  const OWL_BAD = ['Không sao, đọc giải thích rồi thử tiếp nhé!', 'Suýt đúng rồi! Câu sau chắc chắn được!', 'Sai là để nhớ lâu hơn đó!'];
+  const OWL_ASK = ['Câu này bạn nghĩ sao?', 'Suy nghĩ kỹ rồi chọn nha!', 'Mình tin bạn làm được!', 'Đọc kỹ đề nhé!'];
+  function owlSay(mood, text) {
+    const owl = $('#owl');
+    owl.classList.remove('happy', 'sad', 'hop');
+    void owl.getBoundingClientRect();
+    if (mood) owl.classList.add(mood, mood === 'happy' ? 'hop' : 'sad');
+    const b = $('#bubble');
+    b.textContent = text;
+    b.classList.remove('pop'); void b.offsetWidth; b.classList.add('pop');
   }
 
   function renderModel() {
@@ -176,9 +296,11 @@
       const b = document.createElement('button');
       b.type = 'button';
       b.className = 'tab' + (i === state.model ? ' active' : '');
-      b.innerHTML = `<span class="em">${p >= total ? '✅' : m.emoji}</span>
-        <span class="tx"><span class="tn"></span><span class="mini"><i style="width:${(p / total) * 100}%"></i></span>
-        <span class="cnt">${p}/${total}</span></span>`;
+      if (p >= total) b.classList.add('done');
+      b.innerHTML = `<svg class="thumb" viewBox="-20 -20 360 360" aria-hidden="true">${modelSvg(i, p, true)}</svg>
+        <span class="tx"><span class="tn"></span>
+          <span class="mini"><i style="width:${(p / total) * 100}%"></i></span>
+          <span class="cnt">${p >= total ? '✅ Hoàn thành' : `${p}/${total} viên`}</span></span>`;
       b.querySelector('.tn').textContent = m.short;
       b.title = m.name;
       b.addEventListener('click', () => { state.model = i; persist(); renderModel(); renderTabs(); });
@@ -187,8 +309,14 @@
   }
 
   function renderStats() {
-    $('#score').textContent = state.score;
-    $('#streak').textContent = state.streak;
+    [['#score', state.score], ['#streak', state.streak]].forEach(([sel, val]) => {
+      const elx = $(sel);
+      if (elx.textContent !== String(val) && val > 0 && elx.textContent !== '') {
+        const st = elx.closest('.stat');
+        st.classList.remove('bump'); void st.offsetWidth; st.classList.add('bump');
+      }
+      elx.textContent = val;
+    });
   }
 
   // ---------- Hoàn thành ----------
@@ -217,6 +345,7 @@
     }
     openModal('#win');
     confetti();
+    sound('win');
   }
 
   function confetti() {

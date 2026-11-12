@@ -15,7 +15,7 @@ Web tĩnh thuần HTML/CSS/JS, không cần build.
 
 ## Thêm câu hỏi
 
-- **Trong game:** mở **📚 Kho câu hỏi**, viết câu hỏi và chọn tỉnh thành là đáp án đúng. 3 đáp án nhiễu được tạo tự động. Câu hỏi được lưu trên trình duyệt của người thêm.
+- **Trong game:** nút **📚 Kho câu hỏi** bị ẩn với người chơi. Mở trang kèm `?admin` ở cuối link (ví dụ `.../ban-do-viet-nam/?admin`) để thấy nút, viết câu hỏi và chọn tỉnh thành là đáp án đúng. 3 đáp án nhiễu được tạo tự động. Câu hỏi được lưu trên trình duyệt của người thêm.
 - **Cho mọi người chơi:** thêm câu vào mảng `qs` của tỉnh tương ứng trong `provinces.js` rồi deploy lại.
 
 ## Deploy lên Vercel

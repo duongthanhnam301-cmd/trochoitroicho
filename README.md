@@ -20,7 +20,7 @@ Web tĩnh thuần HTML/CSS/JS, không cần build.
 
 ## Thêm câu hỏi
 
-- **Trong game:** bấm **📚 Kho câu hỏi** để thêm, xóa, xuất hoặc nhập JSON. Câu hỏi này được lưu trong trình duyệt (localStorage), nên chỉ máy đó thấy.
+- **Trong game:** nút **📚 Kho câu hỏi** bị ẩn với người chơi. Muốn thấy nút, mở trang kèm `?admin` ở cuối link (ví dụ `https://ten-web.vercel.app/?admin`). Trong đó có thể thêm, xóa, xuất hoặc nhập JSON. Câu hỏi này được lưu trong trình duyệt (localStorage), nên chỉ máy đó thấy.
 - **Cho mọi người chơi:** thêm vào mảng `DEFAULT_QUESTIONS` trong `questions.js` rồi deploy lại:
 
 ```js

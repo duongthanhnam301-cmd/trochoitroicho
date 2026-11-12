@@ -363,6 +363,8 @@
       ul.appendChild(li);
     });
   }
+  // Nút Kho câu hỏi chỉ hiện với người quản lý: mở trang kèm ?admin (vd: /ban-do-viet-nam/?admin)
+  if (new URLSearchParams(location.search).has('admin')) $('#openBank').hidden = false;
   $('#openBank').addEventListener('click', () => { renderList(); $('#bank').hidden = false; });
   $('#search').addEventListener('input', renderList);
   $('#addForm').addEventListener('submit', (e) => {

@@ -288,6 +288,8 @@
     });
   }
 
+  // Nút Kho câu hỏi chỉ hiện với người quản lý: mở trang kèm ?admin (vd: /?admin)
+  if (new URLSearchParams(location.search).has('admin')) $('#openBank').hidden = false;
   $('#openBank').addEventListener('click', () => { $('#mode').value = mode; renderList(); openModal('#bank'); });
   $('#search').addEventListener('input', renderList);
 

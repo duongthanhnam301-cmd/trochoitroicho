@@ -1,6 +1,6 @@
-# 🧱 Xây Gạch Triết Học
+# 🧱 Chủ nghĩa xã hội khoa học
 
-Game trả lời câu hỏi triết học. Mỗi câu trả lời đúng đặt thêm một viên gạch vào mô hình đang xây:
+Game trả lời câu hỏi Chủ nghĩa xã hội khoa học. Mỗi câu trả lời đúng đặt thêm một viên gạch vào mô hình đang xây:
 
 1. 🏛️ **Đền Triết Học Hy Lạp** (10 viên): bậc nền, 4 cột Thales, Socrates, Plato, Aristotle, mái đền và cú Minerva
 2. 🏠 **Ngôi Nhà Duy Vật Lịch Sử** (11 viên): Cơ sở hạ tầng – Kiến trúc thượng tầng

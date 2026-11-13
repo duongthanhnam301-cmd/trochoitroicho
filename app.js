@@ -1,6 +1,6 @@
-// Logic game Xây Gạch Triết Học. Cảnh 3D nằm trong scene.js, âm thanh trong sfx.js.
+// Logic game Xây Dựng Xã Hội Mới (MLN131). Cảnh 3D nằm trong scene.js, âm thanh trong sfx.js.
 const LS_CUSTOM = 'xgth_custom';
-const LS_STATE = 'xgth_state';
+const LS_STATE = 'xdxhm_state';
 const LS_MODE = 'xgth_mode';
 const KEYS = ['A', 'B', 'C', 'D', 'E', 'F'];
 const ROMAN = ['I', 'II', 'III', 'IV', 'V'];
@@ -41,7 +41,7 @@ try {
       new Promise((r) => setTimeout(r, 2500)),
     ]);
   }
-  const { createScene } = await import('./scene.js?v=10');
+  const { createScene } = await import('./scene.js?v=11');
   scene3d = createScene($('#canvasHost'), MODELS);
   window.__scene = scene3d;
 } catch (err) {
@@ -53,7 +53,7 @@ try {
 function renderModel(intro = true) {
   const i = state.model, m = MODELS[i];
   document.documentElement.style.setProperty('--accent', m.accent);
-  $('#modelKicker').textContent = `Công trình ${ROMAN[i]}`;
+  $('#modelKicker').textContent = `Công trình ${ROMAN[i]} · ${m.chapter}`;
   $('#modelName').textContent = m.name;
   $('#modelDesc').textContent = m.desc;
   $('#lastBrick').textContent = '';
@@ -87,7 +87,7 @@ function renderTabs() {
     b.addEventListener('click', () => {
       if (i === state.model) return;
       sfx('click');
-      state.model = i; persist(); renderModel();
+      state.model = i; deck = []; persist(); renderModel();
     });
     nav.appendChild(b);
   });
@@ -117,7 +117,9 @@ function toast(msg) {
 function pool() {
   const mine = custom.map((q) => ({ ...q, custom: true }));
   if (mode === 'custom' && mine.length) return mine;
-  return DEFAULT_QUESTIONS.concat(mine);
+  // câu hỏi theo chương của công trình đang xây + câu chung
+  const id = MODELS[state.model].id;
+  return DEFAULT_QUESTIONS.filter((q) => !q.m || q.m === id).concat(mine);
 }
 
 function nextQuestion() {
@@ -196,14 +198,14 @@ function placeBrick() {
   state.score++;
   if (isDone(state.model)) {
     const m = firstIncomplete();
-    if (m < 0) { toast('Gạch thưởng · cả 3 công trình đã hoàn thành'); return; }
-    state.model = m;
+    if (m < 0) { toast(`Gạch thưởng · cả ${MODELS.length} công trình đã hoàn thành`); return; }
+    state.model = m; deck = [];
     renderModel();
   }
   const m = state.model;
   const idx = state.placed[m];
   state.placed[m]++;
-  const label = MODELS[m].bricks[idx].label;
+  const { label, note } = MODELS[m].bricks[idx];
   const done = isDone(m);
 
   let hit = false;
@@ -214,7 +216,9 @@ function placeBrick() {
     renderProgress();
     renderTabs();
     const lb = $('#lastBrick');
-    lb.textContent = `+ ${label}`;
+    lb.innerHTML = '<b></b><small></small>';
+    lb.querySelector('b').textContent = `+ ${label}`;
+    lb.querySelector('small').textContent = note || '';
     lb.classList.remove('flash'); void lb.offsetWidth; lb.classList.add('flash');
     if (done) setTimeout(() => showCinema(m), 900);
   };
@@ -229,7 +233,7 @@ function placeBrick() {
 function showCinema(m) {
   const model = MODELS[m];
   const allDone = firstIncomplete() < 0;
-  $('#cineKicker').textContent = allDone ? 'Cả ba công trình đã hoàn thành' : `Công trình ${ROMAN[m]} hoàn thành`;
+  $('#cineKicker').textContent = allDone ? `Cả ${MODELS.length} công trình đã hoàn thành` : `Công trình ${ROMAN[m]} hoàn thành`;
   $('#cineTitle').textContent = model.name;
   $('#cineFact').textContent = model.fact;
   const btns = $('#cineBtns');
@@ -246,7 +250,7 @@ function showCinema(m) {
     add('Tiếp tục ôn tập', '', hideCinema);
   } else {
     const next = firstIncomplete();
-    add(`Công trình tiếp theo: ${MODELS[next].short}`, 'primary', () => { hideCinema(); state.model = next; persist(); renderModel(); });
+    add(`Công trình tiếp theo: ${MODELS[next].short}`, 'primary', () => { hideCinema(); state.model = next; deck = []; persist(); renderModel(); });
     add('Ở lại ngắm', '', hideCinema);
   }
   $('#cine').hidden = false;
@@ -343,7 +347,7 @@ $('#mode').addEventListener('change', (e) => {
 $('#exportBtn').addEventListener('click', () => {
   const data = custom.map(({ q, a, c, e }) => (e ? { q, a, c, e } : { q, a, c }));
   const url = URL.createObjectURL(new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' }));
-  const link = Object.assign(document.createElement('a'), { href: url, download: 'cau-hoi-triet-hoc.json' });
+  const link = Object.assign(document.createElement('a'), { href: url, download: 'cau-hoi-mln131.json' });
   document.body.appendChild(link); link.click(); link.remove();
   setTimeout(() => URL.revokeObjectURL(url), 1000);
 });

@@ -41,7 +41,7 @@ try {
       new Promise((r) => setTimeout(r, 2500)),
     ]);
   }
-  const { createScene } = await import('./scene.js?v=9');
+  const { createScene } = await import('./scene.js?v=10');
   scene3d = createScene($('#canvasHost'), MODELS);
   window.__scene = scene3d;
 } catch (err) {

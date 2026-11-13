@@ -2,7 +2,7 @@
   'use strict';
 
   const LS_STATE = 'tsvn_state';
-  const LS_CUSTOM = 'tsvn_custom';
+  const LS_CUSTOM = 'tsvn_custom2';
   const KEYS = ['A', 'B', 'C', 'D'];
   const CHEERS = ['Chuẩn luôn!', 'Giỏi quá!', 'Chính xác!', 'Xuất sắc!', 'Quá đỉnh!', 'Đúng rồi nè!'];
   const SVGNS = 'http://www.w3.org/2000/svg';
@@ -25,7 +25,10 @@
   const fresh = () => ({ lit: [], streak: 0, best: 0, correct: 0, wrong: 0, badge: null, name: '' });
   let state = Object.assign(fresh(), load(LS_STATE, {}));
   state.lit = (Array.isArray(state.lit) ? state.lit : []).filter((id) => BY_ID[id]);
-  let custom = load(LS_CUSTOM, []).filter((q) => q && typeof q.q === 'string' && BY_ID[q.p]);
+  const isValidQ = (q) => q && typeof q.q === 'string' && q.q.trim() && Array.isArray(q.a) && q.a.length >= 2 && q.a.length <= 6 &&
+    q.a.every((x) => typeof x === 'string' && x.trim()) && Number.isInteger(q.c) && q.c >= 0 && q.c < q.a.length;
+  let custom = load(LS_CUSTOM, []).filter(isValidQ);
+  let deck = [];
   const persist = () => save(LS_STATE, state);
 
   const askedCount = {};
@@ -163,18 +166,7 @@
   }
 
   // ---------- Câu hỏi ----------
-  function questionsFor(id) {
-    const p = BY_ID[id];
-    return p.qs.map((q, i) => ({ key: id + ':' + i, q, p: id }))
-      .concat(custom.filter((c) => c.p === id).map((c) => ({ key: c.id, q: c.q, p: id, custom: true })));
-  }
-  function makeOptions(id) {
-    const p = BY_ID[id];
-    const same = shuffle(LIST.filter((x) => x.region === p.region && x.id !== id)).slice(0, 2);
-    const rest = shuffle(LIST.filter((x) => x.id !== id && !same.includes(x))).slice(0, 3 - same.length);
-    return shuffle([p, ...same, ...rest]);
-  }
-
+  // Mỗi câu hỏi (4 đáp án) gắn với một tỉnh bí ẩn chọn ngẫu nhiên. Trả lời đúng thì tỉnh đó sáng lên.
   function nextQuestion() {
     const locked = LIST.filter((p) => !isLit(p.id));
     const bonus = !locked.length;
@@ -182,12 +174,14 @@
     let pool = bonus ? LIST : locked;
     if (pool.length > 1 && prev) pool = pool.filter((p) => p.id !== prev);
     const target = pick(pool).id;
-    const qs = questionsFor(target);
-    const minAsk = Math.min(...qs.map((q) => askedCount[q.key] || 0));
-    const q = pick(qs.filter((x) => (askedCount[x.key] || 0) === minAsk));
-    askedCount[q.key] = (askedCount[q.key] || 0) + 1;
-    const opts = makeOptions(target);
-    current = { ...q, target, bonus, opts, correct: opts.findIndex((o) => o.id === target) };
+    if (!deck.length) {
+      deck = shuffle(DEFAULT_QUESTIONS.concat(custom.map((c) => ({ ...c, custom: true }))));
+      if (current && deck.length > 1 && deck[deck.length - 1].q === current.q) deck.unshift(deck.pop());
+    }
+    const q = deck.pop();
+    const order = shuffle(q.a.map((_, i) => i));
+    const opts = order.map((i) => q.a[i]);
+    current = { ...q, target, bonus, opts, correct: order.indexOf(q.c) };
     answered = false; asked++;
 
     $('#question').textContent = q.q;
@@ -201,7 +195,7 @@
       const b = document.createElement('button');
       b.type = 'button'; b.className = 'opt';
       b.innerHTML = `<span class="k">${KEYS[i]}</span><span class="t"></span>`;
-      b.querySelector('.t').textContent = answerName(o);
+      b.querySelector('.t').textContent = o;
       b.addEventListener('click', () => answer(i));
       box.appendChild(b);
     });
@@ -243,12 +237,12 @@
           setTimeout(() => { confetti(); openBadge(true); sfx('win'); }, 1200);
         }
       } else {
-        fb.textContent = `${pick(CHEERS)} Đáp án là ${p.name}.`;
+        fb.textContent = `${pick(CHEERS)} Bạn đã thắp sáng hết bản đồ rồi, đây là câu ôn tập.`;
       }
     } else {
       state.wrong++; state.streak = 0;
       sfx('bad');
-      fb.textContent = `Tiếc quá 🥺 Đáp án đúng là ${p.name}. Tỉnh này vẫn còn tối, sẽ quay lại sau nhé!`;
+      fb.textContent = `Tiếc quá 🥺 Đáp án đúng: ${current.opts[current.correct]}.` + (current.bonus ? '' : ' Tỉnh bí ẩn vẫn còn tối, thử câu sau nhé!');
       const path = paths[p.id];
       path.classList.remove('miss'); void path.getBBox(); path.classList.add('miss');
     }
@@ -341,15 +335,10 @@
   }));
 
   // ---------- Kho câu hỏi ----------
-  const sel = $('#fP');
-  [...LIST].sort((a, b) => shortName(a).localeCompare(shortName(b), 'vi')).forEach((p) => {
-    const o = document.createElement('option'); o.value = p.id; o.textContent = p.name; sel.appendChild(o);
-  });
   function renderList() {
     const term = $('#search').value.trim().toLowerCase();
-    const all = custom.map((c) => ({ ...c, mine: true })).reverse()
-      .concat(LIST.flatMap((p) => p.qs.map((q) => ({ q, p: p.id }))));
-    const list = all.filter((x) => !term || x.q.toLowerCase().includes(term) || BY_ID[x.p].name.toLowerCase().includes(term));
+    const all = custom.map((c) => ({ ...c, mine: true })).reverse().concat(DEFAULT_QUESTIONS);
+    const list = all.filter((x) => !term || x.q.toLowerCase().includes(term) || x.a.some((a) => a.toLowerCase().includes(term)));
     $('#listCount').textContent = `${list.length} câu · ${custom.length} của bạn`;
     const ul = $('#qList'); ul.innerHTML = '';
     list.forEach((x) => {
@@ -357,11 +346,11 @@
       if (x.mine) li.className = 'mine';
       li.innerHTML = '<div class="qt"><div class="qq"></div><div class="qa"></div></div>';
       li.querySelector('.qq').textContent = x.q;
-      li.querySelector('.qa').textContent = '✓ ' + BY_ID[x.p].name;
+      li.querySelector('.qa').textContent = '✓ ' + x.a[x.c];
       if (x.mine) {
         const del = document.createElement('button');
         del.className = 'del'; del.type = 'button'; del.textContent = 'Xóa';
-        del.addEventListener('click', () => { custom = custom.filter((c) => c.id !== x.id); save(LS_CUSTOM, custom); renderList(); });
+        del.addEventListener('click', () => { custom = custom.filter((c) => c.id !== x.id); save(LS_CUSTOM, custom); deck = []; renderList(); });
         li.appendChild(del);
       }
       ul.appendChild(li);
@@ -374,15 +363,23 @@
   $('#addForm').addEventListener('submit', (e) => {
     e.preventDefault();
     const q = $('#fQ').value.trim();
+    const inputs = [...document.querySelectorAll('.fA')];
+    const ci = +document.querySelector('input[name="fC"]:checked').value;
     if (!q) return;
-    custom.push({ id: 'c' + Date.now().toString(36), q, p: sel.value });
+    if (!inputs[ci].value.trim()) { toast('⚠️ Đáp án được chọn là đúng đang để trống'); inputs[ci].focus(); return; }
+    const a = []; let c = 0;
+    inputs.forEach((inp, i) => { const v = inp.value.trim(); if (v) { if (i === ci) c = a.length; a.push(v); } });
+    if (a.length < 2) { toast('⚠️ Cần ít nhất 2 đáp án'); return; }
+    const item = { id: 'c' + Date.now().toString(36), q, a, c };
+    custom.push(item);
     save(LS_CUSTOM, custom);
-    $('#fQ').value = '';
+    deck.push({ ...item, custom: true });
+    e.target.reset();
     renderList();
-    toast(`💖 Đã thêm câu hỏi cho ${BY_ID[sel.value].name}`);
+    toast('💖 Đã thêm vào bộ sưu tập');
   });
   $('#exportBtn').addEventListener('click', () => {
-    const data = custom.map(({ q, p }) => ({ q, p, tinh: BY_ID[p].name }));
+    const data = custom.map(({ q, a, c }) => ({ q, a, c }));
     const url = URL.createObjectURL(new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' }));
     const a = Object.assign(document.createElement('a'), { href: url, download: 'cau-hoi-thap-sang-viet-nam.json' });
     document.body.appendChild(a); a.click(); a.remove();
@@ -393,14 +390,14 @@
     if (!f) return;
     try {
       const arr = JSON.parse(await f.text());
-      const seen = new Set(custom.map((c) => c.q + '|' + c.p));
+      const seen = new Set(custom.map((c) => c.q.trim()));
       let n = 0;
-      (Array.isArray(arr) ? arr : []).forEach((x, i) => {
-        if (!x || typeof x.q !== 'string' || !x.q.trim() || !BY_ID[x.p] || seen.has(x.q.trim() + '|' + x.p)) return;
-        seen.add(x.q.trim() + '|' + x.p);
-        custom.push({ id: 'c' + Date.now().toString(36) + i, q: x.q.trim(), p: x.p }); n++;
+      (Array.isArray(arr) ? arr : []).filter(isValidQ).forEach((x, i) => {
+        if (seen.has(x.q.trim())) return;
+        seen.add(x.q.trim());
+        custom.push({ id: 'c' + Date.now().toString(36) + i, q: x.q.trim(), a: x.a.map((s) => s.trim()), c: x.c }); n++;
       });
-      save(LS_CUSTOM, custom); renderList();
+      save(LS_CUSTOM, custom); deck = []; renderList();
       toast(n ? `⬆️ Đã nhập ${n} câu hỏi` : 'Không có câu hỏi mới hợp lệ');
     } catch { toast('⚠️ File JSON không hợp lệ'); }
   });

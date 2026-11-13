@@ -9,7 +9,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@500;600;700;800&display=swap" rel="stylesheet" />
-  <link rel="stylesheet" href="style.css?v=2" />
+  <link rel="stylesheet" href="style.css?v=3" />
 </head>
 <body>
   <header class="top">
@@ -76,13 +76,16 @@
       </div>
       <form id="addForm" class="add-form">
         <h4>➕ Thêm câu hỏi của bạn</h4>
-        <p class="muted small">Đáp án đúng là tỉnh thành bạn chọn. 3 đáp án nhiễu được tạo tự động.</p>
+        <p class="muted small">Chấm tròn = đáp án đúng. Cần ít nhất 2 đáp án.</p>
         <label class="field"><span>Câu hỏi</span>
-          <textarea id="fQ" rows="2" required placeholder="Ví dụ: Bánh đa cua là món ngon nổi tiếng của địa phương nào?"></textarea>
+          <textarea id="fQ" rows="2" required placeholder="Ví dụ: Đảng Cộng sản Việt Nam ra đời năm nào?"></textarea>
         </label>
-        <label class="field"><span>Đáp án đúng (tỉnh thành)</span>
-          <select id="fP" required></select>
-        </label>
+        <div class="opt-inputs">
+          <label class="opt-in"><input type="radio" name="fC" value="0" checked /><input type="text" class="fA" placeholder="Đáp án A" /></label>
+          <label class="opt-in"><input type="radio" name="fC" value="1" /><input type="text" class="fA" placeholder="Đáp án B" /></label>
+          <label class="opt-in"><input type="radio" name="fC" value="2" /><input type="text" class="fA" placeholder="Đáp án C (không bắt buộc)" /></label>
+          <label class="opt-in"><input type="radio" name="fC" value="3" /><input type="text" class="fA" placeholder="Đáp án D (không bắt buộc)" /></label>
+        </div>
         <button class="btn primary" type="submit">Thêm vào bộ sưu tập</button>
       </form>
       <div class="bank-tools">
@@ -113,9 +116,10 @@
     </div>
   </div>
 
-  <script src="sfx.js?v=2"></script>
-  <script src="map-data.js?v=2"></script>
-  <script src="provinces.js?v=2"></script>
-  <script src="app.js?v=2"></script>
+  <script src="sfx.js?v=3"></script>
+  <script src="map-data.js?v=3"></script>
+  <script src="provinces.js?v=3"></script>
+  <script src="questions.js?v=3"></script>
+  <script src="app.js?v=3"></script>
 </body>
 </html>

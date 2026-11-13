@@ -219,3 +219,9 @@ textarea:focus, input:focus, select:focus { outline: 2px solid var(--gold); outl
 }
 
 .badge-btn.sound { border-color: var(--line); box-shadow: none; font-size: 20px; width: 44px; height: 44px; }
+
+.opt-inputs { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+.opt-in { display: flex; align-items: center; gap: 8px; }
+.opt-in input[type=radio] { width: 18px; height: 18px; accent-color: var(--gold); flex: none; }
+.quiz-card .options { grid-template-columns: 1fr; }
+@media (max-width: 560px) { .opt-inputs { grid-template-columns: 1fr; } }

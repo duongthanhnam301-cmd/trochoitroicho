@@ -17,7 +17,7 @@ Web tĩnh thuần HTML/CSS/JS, không cần build.
 | `app.js` | Logic game, kho câu hỏi, lưu tiến độ |
 | `scene.js` | Cảnh 3D (three.js tải từ CDN jsDelivr): ánh sáng, camera, gạch rơi |
 | `sfx.js` | Hiệu ứng âm thanh tạo bằng Web Audio, không cần file nhạc |
-| `questions.js` | Bộ câu hỏi mặc định (50 câu) |
+| `questions.js` | 30 câu hỏi môn MLN131 (Chủ nghĩa xã hội khoa học) |
 | `models.js` | Khối 3D của 3 công trình, mỗi phần tử là 1 viên gạch |
 
 ## Thêm câu hỏi

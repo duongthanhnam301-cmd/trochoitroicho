@@ -10,13 +10,14 @@ Web tĩnh thuần HTML/CSS/JS, không cần build.
 |---|---|
 | `index.html`, `style.css` | Giao diện |
 | `app.js` | Logic game, huy hiệu, kho câu hỏi |
-| `provinces.js` | Thông tin 34 tỉnh thành và 2 câu hỏi cho mỗi tỉnh |
+| `provinces.js` | Thông tin 34 tỉnh thành |
+| `questions.js` | 30 câu hỏi môn VNR202 (Lịch sử Đảng) |
 | `map-data.js` | Ranh giới tỉnh (SVG đã rút gọn), có Hoàng Sa và Trường Sa trong ô phụ |
 
 ## Thêm câu hỏi
 
 - **Trong game:** nút **📚 Kho câu hỏi** bị ẩn với người chơi. Mở trang kèm `?admin` ở cuối link (ví dụ `.../ban-do-viet-nam/?admin`) để thấy nút, viết câu hỏi và chọn tỉnh thành là đáp án đúng. 3 đáp án nhiễu được tạo tự động. Câu hỏi được lưu trên trình duyệt của người thêm.
-- **Cho mọi người chơi:** thêm câu vào mảng `qs` của tỉnh tương ứng trong `provinces.js` rồi deploy lại.
+- **Cho mọi người chơi:** thêm câu vào mảng `DEFAULT_QUESTIONS` trong `questions.js` rồi deploy lại.
 
 ## Deploy lên Vercel
 

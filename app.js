@@ -375,12 +375,13 @@ $('#importFile').addEventListener('change', async (e) => {
   }
 });
 
-$('#resetBtn').addEventListener('click', () => {
-  if (confirm('Xóa toàn bộ gạch đã xây và bắt đầu lại? (Câu hỏi bạn thêm vẫn được giữ.)')) {
+['#resetBtn', '#restartBtn'].forEach((s) => $(s).addEventListener('click', () => {
+  sfx('click');
+  if (confirm('Xóa toàn bộ gạch đã xây và bắt đầu lại từ đầu? (Câu hỏi bạn thêm vẫn được giữ.)')) {
     $('#bank').hidden = true;
     resetProgress();
   }
-});
+}));
 
 // ---------- Bàn phím ----------
 $('#nextBtn').addEventListener('click', () => { sfx('click'); nextQuestion(); });
